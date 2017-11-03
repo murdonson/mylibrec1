@@ -140,6 +140,20 @@ public class RSTE extends SocialRecommender
 
     }
 
+    protected double predict(int userIdx, int itemIdx, boolean bound) throws LibrecException {
+        double predictRating = predict(userIdx, itemIdx);
+
+        if (bound) {
+            if (predictRating > maxRate) {
+                predictRating = maxRate;
+            } else if (predictRating < minRate) {
+                predictRating = minRate;
+            }
+        }
+
+        return predictRating;
+    }
+
 
 
     public static void main(String[] args) throws LibrecException
@@ -159,7 +173,7 @@ public class RSTE extends SocialRecommender
         conf.set("rec.recommender.earlystop","false");
         conf.set("rec.recommender.verbose","true");
         conf.set("rec.factor.number","5");
-        conf.set("rec.user.social.ratio","0.4");
+        conf.set("rec.user.social.ratio","1");
         conf.set("data.splitter.ratio", "rating");
         conf.set("data.splitter.trainset.ratio", "0.8");
         conf.set("rec.random.seed","1");
@@ -168,7 +182,6 @@ public class RSTE extends SocialRecommender
         dataModel.buildDataModel();
         RecommenderContext context = new RecommenderContext(conf, dataModel);
         RSTE recommender=new RSTE();
-        //RSTERecommender recommender=new RSTERecommender();
         recommender.setContext(context);
         RecommenderEvaluator evaluator = new MAEEvaluator();
         RecommenderEvaluator evaluator1=new RMSEEvaluator();
