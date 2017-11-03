@@ -9,6 +9,7 @@ import net.librec.eval.ranking.RecallEvaluator;
 import net.librec.eval.rating.MAEEvaluator;
 import net.librec.eval.rating.RMSEEvaluator;
 import net.librec.math.algorithm.Maths;
+import net.librec.math.algorithm.Randoms;
 import net.librec.math.structure.DenseMatrix;
 import net.librec.math.structure.MatrixEntry;
 import net.librec.recommender.RecommenderContext;
@@ -130,7 +131,7 @@ public class Sorec extends SocialRecommender {
         conf.set("data.appender.path","filmtrust/trust");
         conf.set("rec.iterator.learnrate", "0.01");
         conf.set("rec.iterator.learnrate.maximum", "-1");
-        conf.set("rec.iterator.maximum", "100");
+        conf.set("rec.iterator.maximum", "200");
         conf.set("rec.user.regularization", "0.001");
         conf.set("rec.item.regularization", "0.001");
         conf.set("rec.learnrate.bolddriver","false");
@@ -142,6 +143,7 @@ public class Sorec extends SocialRecommender {
         conf.set("rec.user.social.regularization", "0.01");
         conf.set("data.splitter.ratio", "rating");
         conf.set("data.splitter.trainset.ratio", "0.8");
+        Randoms.seed(1);
         TextDataModel dataModel = new TextDataModel(conf);
         dataModel.buildDataModel();
         RecommenderContext context = new RecommenderContext(conf, dataModel);
@@ -150,14 +152,14 @@ public class Sorec extends SocialRecommender {
         RecommenderEvaluator evaluator = new MAEEvaluator();
         RecommenderEvaluator evaluator1=new RMSEEvaluator();
         double mae=0,rmse=0;
-        for(int i=0;i<5;i++)
+        for(int i=0;i<1;i++)
         {
             recommender.recommend(context);
             mae+=recommender.evaluate(evaluator);
             rmse+=recommender.evaluate(evaluator1);
         }
-        System.out.println("MAE:" + mae/5);
-        System.out.println("RMSE:" + rmse/5);
+        System.out.println("MAE:" + mae/1);
+        System.out.println("RMSE:" + rmse/1);
 
     }
 }
