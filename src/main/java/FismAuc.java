@@ -21,13 +21,10 @@ import java.util.concurrent.ExecutionException;
 
 
 public class FismAuc extends MatrixFactorizationRecommender {
-
     DenseMatrix itemfactors2=null;
     DenseVector itemBiases=null;
-
     protected static String cacheSpec;
     public double rho;
-
     public double alpha;
     public double lRate;
     public double gamma;
@@ -35,7 +32,6 @@ public class FismAuc extends MatrixFactorizationRecommender {
     protected LoadingCache<Integer, List<Integer>> userItemsCache;
     @Override
     protected void setup() throws LibrecException {
-
         super.setup();
         itemFactors.init(0,0.01);
         itemBiases=new DenseVector(numItems);
@@ -44,14 +40,12 @@ public class FismAuc extends MatrixFactorizationRecommender {
         itemBiases.init(0,0.01);
         cacheSpec = conf.get("guava.cache.spec", "maximumSize=200,expireAfterAccess=2m");
         userItemsCache = trainMatrix.rowColumnsCache(cacheSpec);
-
         // 硬编码  自己的变量
-        rho=0.5;
+        rho=0.01;
         lRate=0.00001;
         gamma=0.1;
-        beta=0.6;
+        beta=0.5;
         alpha=0.5;
-
     }
 
     protected List unratedSampledItems(List ratedlist,int size,int userId) throws Exception
@@ -63,15 +57,14 @@ public class FismAuc extends MatrixFactorizationRecommender {
         return indices;
 
     }
-
-
     @Override
     protected double predict(int userIdx, int itemIdx) throws LibrecException {
         double pred=itemBiases.get(itemIdx);
         List<Integer> ratedItems=null;
         double sum=0;
         int count=0;
-        try {
+        try
+        {
             ratedItems = userItemsCache.get(userIdx);
         } catch (ExecutionException e) {
             e.printStackTrace();
@@ -134,10 +127,8 @@ public class FismAuc extends MatrixFactorizationRecommender {
                         double ruj=itemBiases.get(j)+t.inner(itemFactors.row(j));
                         double e= trainMatrix.get(userId,i)-trainMatrix.get(userId,j)-rui+ruj;
                         loss+=e*e;
-
                         double bj = itemBiases.get(j);
                         loss+=gamma*(bi*bi+bj*bj);
-
                         // update bi  bj
                         itemBiases.add(i, lRate * (e - gamma * bi));
                         itemBiases.add(j, lRate * (e - gamma * bj));
@@ -145,13 +136,10 @@ public class FismAuc extends MatrixFactorizationRecommender {
                         {
                             double itemfactorvaluei=itemFactors.get(i,factorIdx);
                             double itemfactorvaluej=itemFactors.get(j,factorIdx);
-
                             // update qi qj    准确说是 qif qjf
                             itemFactors.add(i,factorIdx,lRate*(t.get(factorIdx)*e-beta*itemfactorvaluei));
-                            itemFactors.add(j,factorIdx,-lRate*(t.get(factorIdx)*e+beta*itemfactorvaluej));
-
+                            itemFactors.add(j,factorIdx,-lRate*(t.get(factorIdx)*e-beta*itemfactorvaluej));
                             loss+=beta*(itemfactorvaluej*itemfactorvaluej+itemfactorvaluei*itemfactorvaluei);
-
                         }
                         x.add((itemFactors.row(i).minus(itemFactors.row(j))).scale(e));
                     }
@@ -169,8 +157,6 @@ public class FismAuc extends MatrixFactorizationRecommender {
                     }
 
                 }
-
-
             }
             loss*=0.5;
             System.out.println("iter: "+iter+" loss: "+loss);
@@ -178,16 +164,10 @@ public class FismAuc extends MatrixFactorizationRecommender {
                 break;
             }
             //updateLRate(iter);
-
         }
-
-
         long end=System.currentTimeMillis();
         System.out.println("耗时: "+(end-start)/1000+"秒");
-
     }
-
-
     public static void main(String[] args) throws LibrecException {
        Configuration conf=new Configuration() ;
         conf.set("dfs.data.dir","D:/librec-2.0.0/data");
@@ -195,10 +175,10 @@ public class FismAuc extends MatrixFactorizationRecommender {
         conf.set("rec.iterator.learnrate", "0.01");
         //conf.set("rec.recommender.similarity.key" ,"item");
         conf.set("rec.iterator.learnrate.maximum", "0.01");
-        conf.set("rec.iterator.maximum", "20");
+        conf.set("rec.iterator.maximum", "10");
         conf.set("rec.user.regularization", "0.001");
         conf.set("rec.item.regularization", "0.001");
-        conf.set("rec.factor.number", "10");
+        conf.set("rec.factor.number", "5");
         conf.set("rec.recommender.isranking", "true");
         conf.set("data.splitter.ratio", "rating");
         conf.set("data.splitter.trainset.ratio", "0.8");
@@ -211,12 +191,10 @@ public class FismAuc extends MatrixFactorizationRecommender {
         RecommenderEvaluator evaluator1=new NormalizedDCGEvaluator();
         RecommenderEvaluator evaluator2=new PrecisionEvaluator();
         RecommenderEvaluator evaluator3=new RecallEvaluator();
-
         evaluator.setTopN(5);
         evaluator1.setTopN(5);
         evaluator2.setTopN(5);
         evaluator3.setTopN(5);
-
         double auc=0,ndcg=0,prec=0,rec=0;
         for(int i=0;i<1;i++)
         {
