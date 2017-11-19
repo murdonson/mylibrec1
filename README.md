@@ -1,7 +1,8 @@
 # mylibrec
-自己用Librec实现一些算法
-BPR 直接调用librec里面的BPR算法 可以参考这个如何直接调用librec里面的算法  <br/>
-FismAuc librec里面采用向量编程 本人采用矩阵编程 速度更快 但是精确度低 估计是采样有问题==  <br/>
-RSTE与librec实现稍有不同<br/>
-基于Librec 2.0 <br/>
-<strong>未来用librec实现自己的算法<strong>
+
+
+
+<h3>BPR     可以参考这个代码模板学习如何基于MAVEN直接调用librec里面的算法<br/></h3>
+<h3>FismAuc 自己实现 </h3>
+<h3>RSTE    自己实现 </h3>
+
